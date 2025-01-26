@@ -8,6 +8,17 @@ app.get("/", (req, res) => {
   res.send("Ahoy, matey! Welcome to the Blackbeard Pirate GitHub Copilot Extension!")
 });
 
+const logFileContent = (payload) => {
+  const lastMessage = payload.messages[payload.messages.length - 1];
+  if (lastMessage.copilot_references) {
+    const fileRefs = lastMessage.copilot_references.filter(ref => ref.type === 'client.file');
+    fileRefs.forEach(ref => {
+      console.log(`File Content for ${ref.id}:`);
+      console.log(ref.data.content);
+    });
+  }
+};
+
 app.post("/", express.json(), async (req, res) => {
   // Identify the user, using the GitHub API token provided in the request headers.
   const tokenForUser = req.get("X-GitHub-Token");
@@ -18,6 +29,9 @@ app.post("/", express.json(), async (req, res) => {
   // Parse the request payload and log it.
   const payload = req.body;
   console.log("Payload:", payload);
+
+  // Log file content
+  logFileContent(payload);
 
   // Insert a special pirate-y system message in our message list.
   const messages = payload.messages;
